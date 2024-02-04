@@ -19,29 +19,34 @@
             <input type="text" name="user_id" placeholder="Enter User ID" />
             <button type="submit">Get Recommendations</button>
         </form>
-        {% if recommendations is not none and not recommendations.empty %}
-            <table>
-                <tr>
-                    <th>Product ID</th>
-                    <th>Title</th>
-                    <th>Predict Score</th>
-                    <th>Time</th>
-                    <th>Authors</th>
-                    <th>Categories</th>
-                </tr>
-                {% for row in recommendations.itertuples() %}
-                <tr>
-                    <td>{{ row.ProductId }}</td>
-                    <td>{{ row.title }}</td>
-                    <td>{{ row.Predict_Score }}</td>
-                    <td>{{ row.Time }}</td>
-                    <td>{{ row.authors }}</td>
-                    <td>{{ row.categories }}</td>
-                </tr>
-                {% endfor %}
-            </table>
+
+        {% if user_not_found %}
+            <p>User not found. Please enter a valid User ID.</p>
         {% else %}
-            <p>No recommendations to display. Please enter a User ID above.</p>
+            {% if recommendations is not none and not recommendations.empty %}
+                <table>
+                    <tr>
+                        <th>Product ID</th>
+                        <th>Title</th>
+                        <th>Predict Score</th>
+                        <th>Time</th>
+                        <th>Authors</th>
+                        <th>Categories</th>
+                    </tr>
+                    {% for row in recommendations.itertuples() %}
+                    <tr>
+                        <td>{{ row.ProductId }}</td>
+                        <td>{{ row.title }}</td>
+                        <td>{{ row.Predict_Score }}</td>
+                        <td>{{ row.Time }}</td>
+                        <td>{{ row.authors }}</td>
+                        <td>{{ row.categories }}</td>
+                    </tr>
+                    {% endfor %}
+                </table>
+            {% else %}
+                <p>No recommendations to display. Please enter a User ID.</p>
+            {% endif %}
         {% endif %}
     </div>
 </body>

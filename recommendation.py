@@ -250,6 +250,9 @@ def fetch_relevant_items_for_user(user_id, filtered_df, relevant_items=5):
     return final_relevant_items
 
 def provide_recommendations_for_user(user_id, filtered_df, top_n=35):
+    if user_id not in filtered_df['UserId'].values:
+        # Si l'utilisateur n'existe pas, retourner un message ou un DataFrame vide
+        return pd.DataFrame()  # DataFrame vide
     relevant_items = fetch_relevant_items_for_user(user_id, filtered_df, top_n)
     relevant_items_df = filtered_df[filtered_df['title'].isin(relevant_items)]
     relevant_items_df = relevant_items_df.drop('UserId', axis=1)

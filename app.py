@@ -27,12 +27,16 @@ def index():
 def user_recommendation():
     global filtered_df
     recommendations = None
+    user_not_found = False  # Flag pour indiquer si l'utilisateur n'est pas trouvé
+
     if request.method == 'POST':
         user_id = request.form.get('user_id')
         if user_id:
-            recommendations = recommendation.provide_recommendations_for_user(user_id, filtered_df, top_n=35)
-            # print(recommendations)  # Pour déboguer
-    return render_template('user_recommendation.html', recommendations=recommendations)
+            recommendations = recommendation.provide_recommendations_for_user(user_id, filtered_df)
+            if recommendations is None:
+                user_not_found = True
+
+    return render_template('user_recommendation.html', recommendations=recommendations, user_not_found=user_not_found)
 
 
 # app.py

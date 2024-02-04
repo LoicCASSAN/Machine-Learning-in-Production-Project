@@ -1,5 +1,3 @@
-<!-- templates/user_recommendation.html -->
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -8,7 +6,14 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}" />
 </head>
 <body>
-    <div class="container">
+    <div class="sidebar">
+        <a href="/"><button>Home</button></a>
+        <a href="/user_recommendation"><button>User Recommendations</button></a>
+        <a href="/add_book"><button>Add Book</button></a>
+        <a href="/reload_model"><button>Reload Model</button></a>
+    </div>
+
+    <div class="main-content">
         <h2>User Recommendations</h2>
         <form method="POST" action="/user_recommendation">
             <input type="text" name="user_id" placeholder="Enter User ID" />

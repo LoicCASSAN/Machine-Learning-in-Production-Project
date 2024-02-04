@@ -1,5 +1,3 @@
-<!-- templates/add_book.html -->
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -8,7 +6,14 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}" />
 </head>
 <body>
-    <div class="container">
+    <div class="sidebar">
+        <a href="/"><button>Home</button></a>
+        <a href="/user_recommendation"><button>User Recommendations</button></a>
+        <a href="/add_book"><button>Add Book</button></a>
+        <a href="/reload_model"><button>Reload Model</button></a>
+    </div>
+
+    <div class="main-content">
         <h2>Add a Book</h2>
         <form method="POST" action="/add_book">
             <input type="text" name="ProductId" placeholder="Product ID" />

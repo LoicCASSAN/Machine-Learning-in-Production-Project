@@ -1,5 +1,6 @@
 from flask import Flask, request, render_template, redirect, url_for
 import recommendation
+import pandas as pd
 
 # Chargement des modèles et des données
 try:
@@ -11,6 +12,7 @@ app = Flask(__name__)
 
 @app.route('/', methods=['GET', 'POST'])
 def index():
+    global filtered_df
     user_info = None  # Initialiser user_info à None
     if request.method == 'POST':
         user_id = request.form.get('user_id')
@@ -23,11 +25,12 @@ def index():
 
 @app.route('/user_recommendation', methods=['GET', 'POST'])
 def user_recommendation():
+    global filtered_df
     recommendations = None
     if request.method == 'POST':
         user_id = request.form.get('user_id')
         if user_id:
-            recommendations = recommendation.provide_recommendations_for_user(user_id)
+            recommendations = recommendation.provide_recommendations_for_user(user_id, filtered_df, top_n=35)
             # print(recommendations)  # Pour déboguer
     return render_template('user_recommendation.html', recommendations=recommendations)
 
@@ -35,6 +38,7 @@ def user_recommendation():
 # app.py
 @app.route('/add_book', methods=['GET', 'POST'])
 def add_book():
+    global filtered_df  # Ajouter cette ligne pour indiquer que filtered_df est global
     if request.method == 'POST':
         # Récupérer les données du formulaire
         product_id = request.form.get('ProductId')
@@ -67,6 +71,22 @@ def add_book():
 
 
 
+@app.route('/reload_model')
+def reload_model():
+    global filtered_df
+    global U_matrix, S_matrix, VT_matrix, user_id_to_index, product_id_to_index, original_matrix, U_train, VT_train
+
+    # Appeler la fonction pour reconstruire le système de recommandation
+    recommendation.book_recommendation_system(filtered_df)
+
+    # Recharger les modèles et les mappings
+    try:
+        U_matrix, S_matrix, VT_matrix, user_id_to_index, product_id_to_index, original_matrix, U_train, VT_train, filtered_df = recommendation.load_model_and_mappings()
+    except FileNotFoundError as e:
+        print(e)
+
+    # Rediriger vers la page d'accueil ou une autre page appropriée
+    return redirect(url_for('index'))
 
 
 

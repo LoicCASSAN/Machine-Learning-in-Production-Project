@@ -147,7 +147,7 @@ def book_recommendation_system(filtered_df):
         recall = np.mean(recall_scores)
         return recall
     # SVD
-    def split_train_test(matrix, test_size=0.2, random_state=42):
+    def split_train_test(matrix, test_size=0.1, random_state=42):
         train_matrix, test_matrix = train_test_split(matrix, test_size=test_size, random_state=random_state)
         return train_matrix, test_matrix
 
@@ -215,7 +215,7 @@ def book_recommendation_system(filtered_df):
     save_with_unique_name('Model/original_matrix.pkl', matrix)
     save_with_unique_name('Model/U_train.pkl', U_train)
     save_with_unique_name('Model/VT_train.pkl', VT_train)
-    save_with_unique_name('Model/books_metadata.pkl', filtered_df)
+    save_with_unique_name('Model/Book_Dataset.pkl', filtered_df)
     
     print("Recommendation system trained in %s seconds." % (time.time() - start_time))
 
@@ -225,9 +225,9 @@ def book_recommendation_system(filtered_df):
 
 
 ## TEST SUR UTILISATEUR DEJA PRÉSENT
-def fetch_relevant_items_for_user(user_id, relevant_items=5):
+def fetch_relevant_items_for_user(user_id, filtered_df, relevant_items=5):
     # Get the index of the user
-    U_matrix, S_matrix, VT_matrix, user_id_to_index, product_id_to_index, original_matrix, U_train, VT_train, filtered_df = load_model_and_mappings()
+    U_matrix, S_matrix, VT_matrix, user_id_to_index, product_id_to_index, original_matrix, U_train, VT_train, not_used = load_model_and_mappings()
     user_index = user_id_to_index[user_id]
     user_embedding = U_train[user_index, :]
     
@@ -249,8 +249,8 @@ def fetch_relevant_items_for_user(user_id, relevant_items=5):
     
     return final_relevant_items
 
-def provide_recommendations_for_user(user_id, top_n=35, filtered_df=filtered_df):
-    relevant_items = fetch_relevant_items_for_user(user_id, top_n)
+def provide_recommendations_for_user(user_id, filtered_df, top_n=35):
+    relevant_items = fetch_relevant_items_for_user(user_id, filtered_df, top_n)
     relevant_items_df = filtered_df[filtered_df['title'].isin(relevant_items)]
     relevant_items_df = relevant_items_df.drop('UserId', axis=1)
     
@@ -264,10 +264,10 @@ def provide_recommendations_for_user(user_id, top_n=35, filtered_df=filtered_df)
 
 
 
-def display_user_info(user_id, df=filtered_df):
+def display_user_info(user_id, df):
     user_info = df.loc[df['UserId'] == user_id]
     return user_info
 
 def add_book(row, df):
-    df = df.append(row, ignore_index=True)
-    return df
+    new_df = pd.DataFrame(row, index=[0])
+    return pd.concat([df, new_df], ignore_index=True)

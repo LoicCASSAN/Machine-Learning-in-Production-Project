@@ -93,6 +93,21 @@ def reload_model():
     return redirect(url_for('index'))
 
 
+@app.route('/monitoring')
+def monitoring():
+    model_results = pd.read_pickle('Dataset/resultats.pkl')
+
+    df_stats = {
+        'Nombre de lignes': len(filtered_df),
+        'Nombre de produits uniques': filtered_df['ProductId'].nunique(),
+        'Nombre d utilisateurs uniques': filtered_df['UserId'].nunique(),
+    }
+
+    category_stats = filtered_df.groupby('categories')['Score'].agg(['count', 'mean']).reset_index()
+    category_stats.rename(columns={'count': 'Nombre_de_Livres', 'mean': 'Note_Moyenne'}, inplace=True)
+
+    return render_template('monitoring.html', model_results=model_results, df_stats=df_stats, category_stats=category_stats)
+
 
 if __name__ == '__main__':
     app.run(debug=True)

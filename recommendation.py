@@ -192,6 +192,31 @@ def book_recommendation_system(filtered_df):
     print("Precision @ 10: ", precision)
     print("Recall @ 10:", recall)
     print("F1 Score:", f1_score)
+    
+    try:
+        df = pd.read_pickle('Dataset/resultats.pkl')
+    except FileNotFoundError:
+        # Si le fichier pickle n'existe pas, créez un nouveau dataframe
+        df = pd.DataFrame()
+
+    # Ajouter les nouvelles informations
+    new_data = {
+        'RMSE (training)': [np.sqrt(train_mse)],
+        'RMSE (test)': [np.sqrt(test_mse)],
+        'Precision @ 10': [precision],
+        'Recall @ 10': [recall],
+        'F1 Score': [f1_score]
+    }
+
+    new_df = pd.DataFrame(new_data)
+
+    # Concaténer le nouveau dataframe avec l'ancien (s'il existe)
+    df = pd.concat([df, new_df], ignore_index=True)
+
+    # Sauvegarder le dataframe mis à jour dans le fichier pickle
+    df.to_pickle('Dataset/resultats.pkl')
+    
+    
     # Save Model
     # Enregistrement des matrices U, S, et VT
     def save_with_unique_name(path, data):

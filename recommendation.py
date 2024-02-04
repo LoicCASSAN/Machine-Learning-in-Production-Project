@@ -253,7 +253,16 @@ def provide_recommendations_for_user(user_id, top_n=35, filtered_df=filtered_df)
     relevant_items = fetch_relevant_items_for_user(user_id, top_n)
     relevant_items_df = filtered_df[filtered_df['title'].isin(relevant_items)]
     relevant_items_df = relevant_items_df.drop('UserId', axis=1)
+    
+    relevant_items_df = relevant_items_df.rename(columns={'Score': 'Predict_Score'})
+    relevant_items_df = relevant_items_df.sort_values(by='Predict_Score', ascending=False)
+
+    # Grouper par titre et prendre la première occurrence de chaque titre
+    relevant_items_df = relevant_items_df.groupby('title').first().reset_index()
+
     return relevant_items_df
+
+
 
 
 def display_user_info(user_id, df=filtered_df):

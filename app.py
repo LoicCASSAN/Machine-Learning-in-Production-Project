@@ -28,7 +28,9 @@ def user_recommendation():
         user_id = request.form.get('user_id')
         if user_id:
             recommendations = recommendation.provide_recommendations_for_user(user_id)
+            print(recommendations)  # Pour déboguer
     return render_template('user_recommendation.html', recommendations=recommendations)
+
 
 
 

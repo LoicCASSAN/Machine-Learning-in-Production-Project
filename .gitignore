@@ -1,0 +1,4 @@
+Dataset/*
+Model/*
+data_db.py
+__pychache__/

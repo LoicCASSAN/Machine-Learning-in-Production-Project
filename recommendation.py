@@ -221,7 +221,7 @@ def book_recommendation_system(filtered_df):
 
 
 
-book_recommendation_system(filtered_df)
+# book_recommendation_system(filtered_df)
 
 
 ## TEST SUR UTILISATEUR DEJA PRÉSENT
@@ -255,6 +255,6 @@ def provide_recommendations_for_user(user_id, top_n=35):
     return relevant_items_df
 
 
-def display_user_info(user_id, df):
+def display_user_info(user_id, df=filtered_df):
     user_info = df.loc[df['UserId'] == user_id]
     return user_info

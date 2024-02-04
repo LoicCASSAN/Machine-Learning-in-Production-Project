@@ -1,64 +1,82 @@
 body {
-	font-family: Arial, sans-serif;
-	margin: 0;
-	padding: 0;
-	background-color: #f4f4f4;
-	color: #333;
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #f4f4f4;
+    color: #333;
 }
 
 h2 {
-	background-color: #007bff;
-	color: white;
-	padding: 10px;
-	text-align: center;
+    background-color: #007bff;
+    color: white;
+    padding: 10px;
+    text-align: center;
 }
 
 form {
-	margin-bottom: 20px;
+    margin-bottom: 20px;
 }
 
 form,
-ul {
-	width: 80%;
-	margin: 20px auto;
+ul,
+table {
+    width: 80%;
+    margin: 20px auto;
 }
 
 input[type="text"] {
-	padding: 10px;
-	width: calc(100% - 22px);
-	margin-bottom: 10px;
+    padding: 10px;
+    width: calc(100% - 22px);
+    margin-bottom: 10px;
 }
 
 button {
-	padding: 10px;
-	width: 80px;
-	background-color: #007bff;
-	color: white;
-	border: none;
-	cursor: pointer;
+    padding: 10px;
+    width: 80px;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    cursor: pointer;
 }
 
 button:hover {
-	background-color: #0056b3;
+    background-color: #0056b3;
 }
 
 ul {
-	list-style-type: none;
-	padding: 0;
+    list-style-type: none;
+    padding: 0;
 }
 
 li {
-	background-color: white;
-	padding: 10px;
-	margin-bottom: 5px;
+    background-color: white;
+    padding: 10px;
+    margin-bottom: 5px;
 }
 
 a {
-	color: red;
-	text-decoration: none;
-	margin-left: 10px;
+    color: red;
+    text-decoration: none;
+    margin-left: 10px;
 }
 
 a:hover {
-	text-decoration: underline;
+    text-decoration: underline;
+}
+
+/* Table styles */
+table {
+    border-collapse: collapse; /* Collapse the border */
+}
+
+th,
+td {
+    border: 1px solid #ddd; /* Add border to the table header and cells */
+    padding: 8px;
+    text-align: left;
+}
+
+th {
+    background-color: #007bff;
+    color: white;
 }

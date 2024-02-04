@@ -15,62 +15,62 @@ from IPython.display import clear_output
 import pickle
 # from data_db import user, mdp
 import time
+import os
 
 
-def book_recommendation_system():
+def get_latest_file(path_pattern):
+    dir_name, file_pattern = os.path.split(path_pattern)
+    base, ext = os.path.splitext(file_pattern)
+    base = base.replace('*', '')  # Supprimez l'astérisque pour la correspondance
+    files = [f for f in os.listdir(dir_name) if f.endswith(base + ext) and '_' in f]
+    if not files:  # S'il n'y a pas de fichier correspondant
+        raise FileNotFoundError(f"No file found for the pattern {path_pattern}")
+    # Trier les fichiers en fonction du numéro avant le tiret bas, s'il existe, sinon 0
+    latest_file = max(files, key=lambda x: int(x.split('_')[0]) if x.split('_')[0].isdigit() else 0)
+    return os.path.join(dir_name, latest_file)
+
+def load_model_and_mappings():
+    U_matrix_path = get_latest_file('Model/*U_matrix.pkl')
+    S_matrix_path = get_latest_file('Model/*S_matrix.pkl')
+    VT_matrix_path = get_latest_file('Model/*VT_matrix.pkl')
+    user_id_to_index_path = get_latest_file('Model/*user_id_to_index.pkl')
+    product_id_to_index_path = get_latest_file('Model/*product_id_to_index.pkl')
+    original_matrix_path = get_latest_file('Model/*original_matrix.pkl')
+    U_train_path = get_latest_file('Model/*U_train.pkl')
+    VT_train_path = get_latest_file('Model/*VT_train.pkl')
+    Book_Dataset_path = get_latest_file('Model/*Book_Dataset.pkl')
+
+    with open(U_matrix_path, 'rb') as f:
+        U_matrix = pickle.load(f)
+    with open(S_matrix_path, 'rb') as f:
+        S_matrix = pickle.load(f)
+    with open(VT_matrix_path, 'rb') as f:
+        VT_matrix = pickle.load(f)
+    with open(user_id_to_index_path, 'rb') as f:
+        user_id_to_index = pickle.load(f)
+    with open(product_id_to_index_path, 'rb') as f:
+        product_id_to_index = pickle.load(f)
+    with open(original_matrix_path, 'rb') as f:
+        original_matrix = pickle.load(f)
+    with open(U_train_path, 'rb') as f:
+        U_train = pickle.load(f)
+    with open(VT_train_path, 'rb') as f:
+        VT_train = pickle.load(f)
+    filtered_df = pd.read_pickle(Book_Dataset_path)
+
+    return U_matrix, S_matrix, VT_matrix, user_id_to_index, product_id_to_index, original_matrix, U_train, VT_train, filtered_df
+
+# Utilisation de la fonction
+try:
+    U_matrix, S_matrix, VT_matrix, user_id_to_index, product_id_to_index, original_matrix, U_train, VT_train, filtered_df = load_model_and_mappings()
+except FileNotFoundError as e:
+    print(e)
+
+
+
+def book_recommendation_system(filtered_df):
     print("Training recommendation system start...")
     start_time = time.time()
-    filtered_df = pd.read_csv('Dataset/Book_Dataset.csv')
-
-    # def get_user_data(user_email):
-    #     # Connect to the database
-    #     engine = create_engine('mysql+pymysql://'+user+':'+mdp+'@localhost:3306/db_master_project') # Change the password accordingly !!!!
-
-    #     # Load user's read and liked books from the database
-    #     query = text(f"SELECT * FROM user WHERE email = '{user_email}';")
-    #     user_data = pd.read_sql_query(query, engine)
-    #     return user_data
-    # # user_data = get_user_data('john.doe@example.com')
-    # def get_user_books(user_email):
-    #     """ Récupère les livres d'un utilisateur à partir de la base de données """
-    #     engine = create_engine('mysql+pymysql://'+user+':'+mdp+'@localhost:3306/db_master_project')
-    #     user_books_query = text(f"SELECT * FROM book WHERE owner = '{user_email}';")
-    #     user_books = pd.read_sql_query(user_books_query, engine)
-    #     #user_books = user_books[user_books['rating'].between(0, 5)]
-    #     # Prendre en compte la casse et les espaces supplémentaires
-    #     user_books['title'] = user_books['title'].str.strip().str.lower()
-    #     return user_books
-
-    # # user_books = get_user_books('john.doe@example.com')
-    # def get_all_user_books():
-    #     """ Récupère les livres d'un utilisateur à partir de la base de données """
-    #     engine = create_engine('mysql+pymysql://'+user+':'+mdp+'@localhost:3306/db_master_project')
-    #     user_books_query = text(f"SELECT * FROM book;")
-    #     user_books = pd.read_sql_query(user_books_query, engine)
-    #     #user_books = user_books[user_books['rating'].between(0, 5)]
-    #     # Prendre en compte la casse et les espaces supplémentaires
-    #     user_books['title'] = user_books['title'].str.strip().str.lower()
-    #     return user_books
-
-    # all_user_books = get_all_user_books()
-    # all_user_books.head(1)
-    # filtered_df.head(1)
-    # # Grouper par titre et obtenir le premier ProductId pour chaque groupe
-    # product_ids_by_title = filtered_df.groupby('title')['ProductId'].first()
-    # # Sélection et renommage des colonnes dans all_user_books pour correspondre à filtered_df
-    # adapted_all_user_books = all_user_books[['title', 'owner', 'author', 'rating']].copy()
-    # adapted_all_user_books.rename(columns={'owner': 'UserId', 'author': 'authors', 'rating': 'Score'}, inplace=True)
-
-    # # Ajout des colonnes manquantes avec des valeurs par défaut ou vides
-    # adapted_all_user_books['ProductId'] = ''  # Ajout d'une colonne ProductId vide
-    # adapted_all_user_books['Time'] = None  # Vous pouvez remplacer None par une valeur par défaut si nécessaire
-    # adapted_all_user_books['categories'] = None  # Vous pouvez remplacer None par une valeur par défaut si nécessaire
-
-    # # Réorganiser les colonnes pour qu'elles correspondent à celles de filtered_df
-    # adapted_all_user_books = adapted_all_user_books[['ProductId', 'UserId', 'title', 'Score', 'Time', 'authors', 'categories']]
-
-    # # Concaténation de adapted_all_user_books avec filtered_df
-    # filtered_df = pd.concat([filtered_df, adapted_all_user_books], ignore_index=True)
 
     from fuzzywuzzy import process
 
@@ -194,77 +194,34 @@ def book_recommendation_system():
     print("F1 Score:", f1_score)
     # Save Model
     # Enregistrement des matrices U, S, et VT
-    with open('Model/U_matrix.pkl', 'wb') as f:
-        pickle.dump(U_train, f)
+    def save_with_unique_name(path, data):
+        dir_name, file_name = os.path.split(path)
+        base, ext = os.path.splitext(file_name)
+        counter = 1
+        new_path = os.path.join(dir_name, f"{base}{ext}")  # Définir le chemin sans préfixe de compteur pour le premier essai
+        while os.path.exists(new_path):  # Vérifier si le fichier existe sans préfixe de compteur
+            new_path = os.path.join(dir_name, f"{counter}_{base}{ext}")  # Ajouter un préfixe de compteur si nécessaire
+            counter += 1
+        with open(new_path, 'wb') as f:
+            pickle.dump(data, f)
+        return new_path  # Retourner le nouveau chemin pour confirmer où le fichier a été sauvegardé
 
-    with open('Model/S_matrix.pkl', 'wb') as f:
-        pickle.dump(S_train, f)
-
-    with open('Model/VT_matrix.pkl', 'wb') as f:
-        pickle.dump(VT_train, f)
-
-    # Enregistrement des mappages
-    with open('Model/user_id_to_index.pkl', 'wb') as f:
-        pickle.dump(user_id_to_index, f)
-
-    with open('Model/product_id_to_index.pkl', 'wb') as f:
-        pickle.dump(product_id_to_index, f)
-
-    # Enregistrement de la matrice d'origine
-    with open('Model/original_matrix.pkl', 'wb') as f:
-        pickle.dump(matrix, f)
-
-    with open('Model/user_id_to_index.pkl', 'wb') as f:
-        pickle.dump(user_id_to_index, f)
-        
-    with open('Model/U_train.pkl', 'wb') as f:
-        pickle.dump(U_train, f)
-        
-    with open('Model/VT_train.pkl', 'wb') as f:
-        pickle.dump(VT_train, f)
-        
-    filtered_df.to_pickle('Model/books_metadata.pkl')
+    # Utilisation de la fonction
+    save_with_unique_name('Model/U_matrix.pkl', U_train)
+    save_with_unique_name('Model/S_matrix.pkl', S_train)
+    save_with_unique_name('Model/VT_matrix.pkl', VT_train)
+    save_with_unique_name('Model/user_id_to_index.pkl', user_id_to_index)
+    save_with_unique_name('Model/product_id_to_index.pkl', product_id_to_index)
+    save_with_unique_name('Model/original_matrix.pkl', matrix)
+    save_with_unique_name('Model/U_train.pkl', U_train)
+    save_with_unique_name('Model/VT_train.pkl', VT_train)
+    save_with_unique_name('Model/books_metadata.pkl', filtered_df)
     
     print("Recommendation system trained in %s seconds." % (time.time() - start_time))
 
 
 
-book_recommendation_system()
-
-
-
-
-def load_model_and_mappings():
-    with open('Model/U_matrix.pkl', 'rb') as f:
-        U_matrix = pickle.load(f)
-
-    with open('Model/S_matrix.pkl', 'rb') as f:
-        S_matrix = pickle.load(f)
-
-    with open('Model/VT_matrix.pkl', 'rb') as f:
-        VT_matrix = pickle.load(f)
-
-    with open('Model/user_id_to_index.pkl', 'rb') as f:
-        user_id_to_index = pickle.load(f)
-
-    with open('Model/product_id_to_index.pkl', 'rb') as f:
-        product_id_to_index = pickle.load(f)
-
-    with open('Model/original_matrix.pkl', 'rb') as f:
-        original_matrix = pickle.load(f)
-
-    with open('Model/U_train.pkl', 'rb') as f:
-        U_train = pickle.load(f)
-        
-    with open('Model/VT_train.pkl', 'rb') as f:
-        VT_train = pickle.load(f)
-        
-    filtered_df = pd.read_pickle('Model/books_metadata.pkl')
-
-    return U_matrix, S_matrix, VT_matrix, user_id_to_index, product_id_to_index, original_matrix, U_train, VT_train, filtered_df
-
-# Utilisation de la fonction
-U_matrix, S_matrix, VT_matrix, user_id_to_index, product_id_to_index, original_matrix, U_train, VT_train, filtered_df = load_model_and_mappings()
+book_recommendation_system(filtered_df)
 
 
 ## TEST SUR UTILISATEUR DEJA PRÉSENT
@@ -292,41 +249,12 @@ def fetch_relevant_items_for_user(user_id, relevant_items=5):
     
     return final_relevant_items
 
-def get_user_books(user_email):
-    """ Récupère les livres d'un utilisateur à partir de la base de données """
-    engine = create_engine('mysql+pymysql://'+user+':'+mdp+'@localhost:3306/db_master_project')
-    user_books_query = text(f"SELECT * FROM book WHERE owner = '{user_email}';")
-    user_books = pd.read_sql_query(user_books_query, engine)
-    #user_books = user_books[user_books['rating'].between(0, 5)]
-    # Prendre en compte la casse et les espaces supplémentaires
-    user_books['title'] = user_books['title'].str.strip().str.lower()
-    print("User book :",user_books)
-    return user_books
-
 def provide_recommendations_for_user(user_id, top_n=35):
-    U_matrix, S_matrix, VT_matrix, user_id_to_index, product_id_to_index, original_matrix, U_train, VT_train, filtered_df = load_model_and_mappings()
-    print("Recommendation for user", user_id)
-    # Fetch relevant items for the user
     relevant_items = fetch_relevant_items_for_user(user_id, top_n)
+    relevant_items_df = pd.DataFrame(relevant_items, columns=['title'])
+    return relevant_items_df
 
-    # Create a list to store the recommendations
-    recommendations = [(title, user_id, '', '', '', '') for title in relevant_items]
 
-    # Connect to the database
-    engine = create_engine('mysql+pymysql://'+user+':'+mdp+'@localhost:3306/db_master_project')
-
-    with engine.connect() as connection:
-        # Delete old recommendations for this user
-        delete_query = text("DELETE FROM recco_book WHERE owner = :owner")
-        connection.execute(delete_query, {"owner": user_id})
-
-        # Insert new recommendations
-        insert_query = text("INSERT INTO recco_book (title, owner, author, year, type, publisher) VALUES (:title, :owner, :author, :year, :type, :publisher)")
-        for rec in recommendations:
-            connection.execute(insert_query, {"title": rec[0], "owner": rec[1], "author": rec[2], "year": rec[3], "type": rec[4], "publisher": rec[5]})
-
-        # Commit the transaction
-        connection.commit()
-
-    # Return the list of recommendations (optional)
-    return recommendations
+def display_user_info(user_id, df):
+    user_info = df.loc[df['UserId'] == user_id]
+    return user_info

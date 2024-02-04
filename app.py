@@ -1,6 +1,7 @@
 from flask import Flask, request, render_template, redirect, url_for
 import recommendation
 import pandas as pd
+import os
 
 # Chargement des modèles et des données
 try:
@@ -91,7 +92,6 @@ def reload_model():
 
     # Rediriger vers la page d'accueil ou une autre page appropriée
     return redirect(url_for('index'))
-
 
 @app.route('/monitoring')
 def monitoring():

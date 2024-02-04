@@ -249,9 +249,10 @@ def fetch_relevant_items_for_user(user_id, relevant_items=5):
     
     return final_relevant_items
 
-def provide_recommendations_for_user(user_id, top_n=35):
+def provide_recommendations_for_user(user_id, top_n=35, filtered_df=filtered_df):
     relevant_items = fetch_relevant_items_for_user(user_id, top_n)
-    relevant_items_df = pd.DataFrame(relevant_items, columns=['title'])
+    relevant_items_df = filtered_df[filtered_df['title'].isin(relevant_items)]
+    relevant_items_df = relevant_items_df.drop('UserId', axis=1)
     return relevant_items_df
 
 

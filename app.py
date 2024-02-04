@@ -20,5 +20,21 @@ def index():
                 user_info = None  # Réinitialiser user_info si aucune info n'est trouvée
     return render_template('index.html', user_info=user_info)
 
+
+@app.route('/user_recommendation', methods=['GET', 'POST'])
+def user_recommendation():
+    recommendations = None
+    if request.method == 'POST':
+        user_id = request.form.get('user_id')
+        if user_id:
+            recommendations = recommendation.provide_recommendations_for_user(user_id)
+    return render_template('user_recommendation.html', recommendations=recommendations)
+
+
+
+
+
+
+
 if __name__ == '__main__':
     app.run(debug=True)

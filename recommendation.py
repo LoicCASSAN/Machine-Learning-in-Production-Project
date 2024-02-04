@@ -264,7 +264,10 @@ def provide_recommendations_for_user(user_id, top_n=35, filtered_df=filtered_df)
 
 
 
-
 def display_user_info(user_id, df=filtered_df):
     user_info = df.loc[df['UserId'] == user_id]
     return user_info
+
+def add_book(row, df):
+    df = df.append(row, ignore_index=True)
+    return df

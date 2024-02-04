@@ -28,10 +28,42 @@ def user_recommendation():
         user_id = request.form.get('user_id')
         if user_id:
             recommendations = recommendation.provide_recommendations_for_user(user_id)
-            print(recommendations)  # Pour déboguer
+            # print(recommendations)  # Pour déboguer
     return render_template('user_recommendation.html', recommendations=recommendations)
 
 
+# app.py
+@app.route('/add_book', methods=['GET', 'POST'])
+def add_book():
+    if request.method == 'POST':
+        # Récupérer les données du formulaire
+        product_id = request.form.get('ProductId')
+        user_id = request.form.get('UserId')
+        title = request.form.get('title')
+        score = request.form.get('Score')
+        time = request.form.get('Time')
+        authors = request.form.get('authors')
+        categories = request.form.get('categories')
+
+        # Validation pour s'assurer que le score est un nombre valide
+        try:
+            score = float(score)  # Tentative de conversion en float
+        except ValueError:
+            # Gérer l'erreur si la conversion échoue
+            # Par exemple, renvoyer un message d'erreur à l'utilisateur
+            return render_template('add_book.html', error="Invalid score. Please enter a numeric value.")
+
+        # Créer une nouvelle ligne sous forme de dictionnaire
+        new_row = {'ProductId': product_id, 'UserId': user_id, 'title': title, 
+                   'Score': score, 'Time': time, 'authors': authors, 'categories': categories}
+        
+        # Ajouter la nouvelle ligne au DataFrame
+        filtered_df = recommendation.add_book(new_row, filtered_df)
+
+        # Rediriger vers la page d'accueil ou une autre page si souhaité
+        return redirect(url_for('index'))
+
+    return render_template('add_book.html')
 
 
 

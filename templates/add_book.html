@@ -1,0 +1,25 @@
+<!-- templates/add_book.html -->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <title>Add Book</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}" />
+</head>
+<body>
+    <div class="container">
+        <h2>Add a Book</h2>
+        <form method="POST" action="/add_book">
+            <input type="text" name="ProductId" placeholder="Product ID" />
+            <input type="text" name="UserId" placeholder="User ID" />
+            <input type="text" name="title" placeholder="Title" />
+            <input type="text" name="Score" placeholder="Score" />
+            <input type="text" name="Time" placeholder="Time" />
+            <input type="text" name="authors" placeholder="Authors" />
+            <input type="text" name="categories" placeholder="Categories" />
+            <button type="submit">Add Book</button>
+        </form>
+    </div>
+</body>
+</html>

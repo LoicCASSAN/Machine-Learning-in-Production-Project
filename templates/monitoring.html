@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <title>Monitoring</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}" />
+</head>
+<body>
+    <div class="sidebar">
+        <a href="/"><button>Home</button></a>
+        <a href="/user_recommendation"><button>User Recommendations</button></a>
+        <a href="/add_book"><button>Add Book</button></a>
+        <a href="/monitoring"><button>Monitoring</button></a>
+        <a href="/reload_model"><button>Reload Model</button></a>
+    </div>
+
+    <div class="main-content">
+        <h2>Monitoring</h2>
+        
+        <h3>Statistiques du DataFrame</h3>
+        <ul>
+            {% for key, value in df_stats.items() %}
+            <li>{{ key }}: {{ value }}</li>
+            {% endfor %}
+        </ul>
+
+        <h3>Résultats du Modèle</h3>
+        <table>
+            <tr>
+                <th>Métrique</th>
+                <th>Valeur</th>
+            </tr>
+            {% for metric, value in model_results.items() %}
+            <tr>
+                <td>{{ metric }}</td>
+                <td>{{ value }}</td>
+            </tr>
+            {% endfor %}
+        </table>
+
+        <h3>Statistiques par Catégorie</h3>
+        <table>
+            <tr>
+                <th>Catégorie</th>
+                <th>Nombre de Livres</th>
+                <th>Note Moyenne</th>
+            </tr>
+            {% for row in category_stats.itertuples() %}
+            <tr>
+                <td>{{ row.categories }}</td>
+                <td>{{ row.Nombre_de_Livres }}</td>
+                <td>{{ "%.2f"|format(row.Note_Moyenne) }}</td>
+            </tr>
+            {% endfor %}            
+        </table>
+    </div>
+</body>
+</html>

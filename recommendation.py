@@ -13,123 +13,64 @@ from sklearn.metrics.pairwise import linear_kernel
 from fuzzywuzzy import process, fuzz
 from IPython.display import clear_output
 import pickle
-from data_db import user, mdp
+# from data_db import user, mdp
 import time
 
 
 def book_recommendation_system():
     print("Training recommendation system start...")
     start_time = time.time()
-    ## PREPROCESSING
-    book_data = pd.read_csv("Dataset/books_metadata_Amazon.csv", delimiter=',', on_bad_lines='skip')
-    book_data = book_data[['Title', 'authors', 'categories']] # keep the Title, authors and categories from the columns
-    # Function to convert a list into a string
-    def list_to_string(list):
-        return ', '.join(list)
+    filtered_df = pd.read_csv('Dataset/Book_Dataset.csv')
 
-    def str_to_list(list_str):
-        if isinstance(list_str, str):
-            return ast.literal_eval(list_str)
-        else:
-            return []
+    # def get_user_data(user_email):
+    #     # Connect to the database
+    #     engine = create_engine('mysql+pymysql://'+user+':'+mdp+'@localhost:3306/db_master_project') # Change the password accordingly !!!!
 
-    # Replace NaN with empty strings
-    book_data['authors'] = book_data['authors'].fillna('[]')
-    book_data['categories'] = book_data['categories'].fillna('[]')
+    #     # Load user's read and liked books from the database
+    #     query = text(f"SELECT * FROM user WHERE email = '{user_email}';")
+    #     user_data = pd.read_sql_query(query, engine)
+    #     return user_data
+    # # user_data = get_user_data('john.doe@example.com')
+    # def get_user_books(user_email):
+    #     """ Récupère les livres d'un utilisateur à partir de la base de données """
+    #     engine = create_engine('mysql+pymysql://'+user+':'+mdp+'@localhost:3306/db_master_project')
+    #     user_books_query = text(f"SELECT * FROM book WHERE owner = '{user_email}';")
+    #     user_books = pd.read_sql_query(user_books_query, engine)
+    #     #user_books = user_books[user_books['rating'].between(0, 5)]
+    #     # Prendre en compte la casse et les espaces supplémentaires
+    #     user_books['title'] = user_books['title'].str.strip().str.lower()
+    #     return user_books
 
-    # Convert strings that look like lists into actual lists
-    book_data['authors'] = book_data['authors'].apply(str_to_list)
-    book_data['categories'] = book_data['categories'].apply(str_to_list)
+    # # user_books = get_user_books('john.doe@example.com')
+    # def get_all_user_books():
+    #     """ Récupère les livres d'un utilisateur à partir de la base de données """
+    #     engine = create_engine('mysql+pymysql://'+user+':'+mdp+'@localhost:3306/db_master_project')
+    #     user_books_query = text(f"SELECT * FROM book;")
+    #     user_books = pd.read_sql_query(user_books_query, engine)
+    #     #user_books = user_books[user_books['rating'].between(0, 5)]
+    #     # Prendre en compte la casse et les espaces supplémentaires
+    #     user_books['title'] = user_books['title'].str.strip().str.lower()
+    #     return user_books
 
-    # Convert the lists into strings
-    book_data['authors'] = book_data['authors'].apply(list_to_string)
-    book_data['categories'] = book_data['categories'].apply(list_to_string)
-    # consider on user_id, book_id, and ratings
-    df = pd.read_csv('Dataset/Books_Amazon.csv')
-    df = df[['Id','User_id','Title','review/score', 'review/time']]
-    df.rename(columns={'Id':'ProductId','User_id':'UserId','review/time':'Time','Title':'title','review/score':'Score'},inplace=True)
-    df.shape
-    # FUSION DES DONNEES
-    df['title'] = df['title'].str.strip().str.lower()
-    book_data['Title'] = book_data['Title'].str.strip().str.lower()
+    # all_user_books = get_all_user_books()
+    # all_user_books.head(1)
+    # filtered_df.head(1)
+    # # Grouper par titre et obtenir le premier ProductId pour chaque groupe
+    # product_ids_by_title = filtered_df.groupby('title')['ProductId'].first()
+    # # Sélection et renommage des colonnes dans all_user_books pour correspondre à filtered_df
+    # adapted_all_user_books = all_user_books[['title', 'owner', 'author', 'rating']].copy()
+    # adapted_all_user_books.rename(columns={'owner': 'UserId', 'author': 'authors', 'rating': 'Score'}, inplace=True)
 
-    # Merge the DataFrames on the titles
-    df = df.merge(book_data, how='left', left_on='title', right_on='Title')
+    # # Ajout des colonnes manquantes avec des valeurs par défaut ou vides
+    # adapted_all_user_books['ProductId'] = ''  # Ajout d'une colonne ProductId vide
+    # adapted_all_user_books['Time'] = None  # Vous pouvez remplacer None par une valeur par défaut si nécessaire
+    # adapted_all_user_books['categories'] = None  # Vous pouvez remplacer None par une valeur par défaut si nécessaire
 
-    # Supprimez la colonne des titres en double
-    df = df.drop(columns=['Title'])
+    # # Réorganiser les colonnes pour qu'elles correspondent à celles de filtered_df
+    # adapted_all_user_books = adapted_all_user_books[['ProductId', 'UserId', 'title', 'Score', 'Time', 'authors', 'categories']]
 
-    df
-    # Data Preprocessing
-    #lots of fields where user is NaN
-    df = df.dropna(subset=['UserId'])
-    print("Size of 'ProductId' column:", len(df['ProductId']))
-    print("Size of 'UserId' column:", len(df['UserId']))
-
-    # Define the threshold values
-    product_id_threshold = 200 
-    user_id_threshold = 10
-
-    # Count the occurrences of ProductId and UserId
-    product_id_counts = df['ProductId'].value_counts()
-    user_id_counts = df['UserId'].value_counts()
-
-    # Filter out rows below the threshold
-    filtered_df = df[(df['ProductId'].isin(product_id_counts[product_id_counts >= product_id_threshold].index)) &
-                    (df['UserId'].isin(user_id_counts[user_id_counts >= user_id_threshold].index))]
-
-    print("Size of 'ProductId' column:", len(filtered_df['ProductId']))
-    print("Size of 'UserId' column:", len(filtered_df['UserId']))
-
-    def get_user_data(user_email):
-        # Connect to the database
-        engine = create_engine('mysql+pymysql://'+user+':'+mdp+'@localhost:3306/db_master_project') # Change the password accordingly !!!!
-
-        # Load user's read and liked books from the database
-        query = text(f"SELECT * FROM user WHERE email = '{user_email}';")
-        user_data = pd.read_sql_query(query, engine)
-        return user_data
-    # user_data = get_user_data('john.doe@example.com')
-    def get_user_books(user_email):
-        """ Récupère les livres d'un utilisateur à partir de la base de données """
-        engine = create_engine('mysql+pymysql://'+user+':'+mdp+'@localhost:3306/db_master_project')
-        user_books_query = text(f"SELECT * FROM book WHERE owner = '{user_email}';")
-        user_books = pd.read_sql_query(user_books_query, engine)
-        #user_books = user_books[user_books['rating'].between(0, 5)]
-        # Prendre en compte la casse et les espaces supplémentaires
-        user_books['title'] = user_books['title'].str.strip().str.lower()
-        return user_books
-
-    # user_books = get_user_books('john.doe@example.com')
-    def get_all_user_books():
-        """ Récupère les livres d'un utilisateur à partir de la base de données """
-        engine = create_engine('mysql+pymysql://'+user+':'+mdp+'@localhost:3306/db_master_project')
-        user_books_query = text(f"SELECT * FROM book;")
-        user_books = pd.read_sql_query(user_books_query, engine)
-        #user_books = user_books[user_books['rating'].between(0, 5)]
-        # Prendre en compte la casse et les espaces supplémentaires
-        user_books['title'] = user_books['title'].str.strip().str.lower()
-        return user_books
-
-    all_user_books = get_all_user_books()
-    all_user_books.head(1)
-    filtered_df.head(1)
-    # Grouper par titre et obtenir le premier ProductId pour chaque groupe
-    product_ids_by_title = filtered_df.groupby('title')['ProductId'].first()
-    # Sélection et renommage des colonnes dans all_user_books pour correspondre à filtered_df
-    adapted_all_user_books = all_user_books[['title', 'owner', 'author', 'rating']].copy()
-    adapted_all_user_books.rename(columns={'owner': 'UserId', 'author': 'authors', 'rating': 'Score'}, inplace=True)
-
-    # Ajout des colonnes manquantes avec des valeurs par défaut ou vides
-    adapted_all_user_books['ProductId'] = ''  # Ajout d'une colonne ProductId vide
-    adapted_all_user_books['Time'] = None  # Vous pouvez remplacer None par une valeur par défaut si nécessaire
-    adapted_all_user_books['categories'] = None  # Vous pouvez remplacer None par une valeur par défaut si nécessaire
-
-    # Réorganiser les colonnes pour qu'elles correspondent à celles de filtered_df
-    adapted_all_user_books = adapted_all_user_books[['ProductId', 'UserId', 'title', 'Score', 'Time', 'authors', 'categories']]
-
-    # Concaténation de adapted_all_user_books avec filtered_df
-    filtered_df = pd.concat([filtered_df, adapted_all_user_books], ignore_index=True)
+    # # Concaténation de adapted_all_user_books avec filtered_df
+    # filtered_df = pd.concat([filtered_df, adapted_all_user_books], ignore_index=True)
 
     from fuzzywuzzy import process
 

@@ -34,9 +34,9 @@ def user_recommendation():
         user_id = request.form.get('user_id')
         if user_id:
             recommendations = recommendation.provide_recommendations_for_user(user_id, filtered_df)
+            recommendations = recommendations.sort_values('Predict_Score', ascending=False)
             if recommendations is None:
                 user_not_found = True
-
     return render_template('user_recommendation.html', recommendations=recommendations, user_not_found=user_not_found)
 
 

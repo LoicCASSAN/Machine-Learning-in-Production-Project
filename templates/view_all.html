@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <title>View All Data</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}" />
+</head>
+<body>
+    <div class="sidebar">
+        <a href="/"><button>Home</button></a>
+        <a href="/user_recommendation"><button>User Recommendations</button></a>
+        <a href="/add_book"><button>Add Book</button></a>
+        <a href="/monitoring"><button>Monitoring</button></a>
+        <a href="/reload_model"><button>Reload Model</button></a>
+    </div>
+
+    <div class="main-content">
+        <h1>All Data</h1>
+        {{ table|safe }}
+    </div>
+</body>
+</html>

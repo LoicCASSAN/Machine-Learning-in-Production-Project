@@ -23,6 +23,11 @@ def index():
                 user_info = None  # Réinitialiser user_info si aucune info n'est trouvée
     return render_template('index.html', user_info=user_info)
 
+@app.route('/view_all')
+def view_all():
+    global filtered_df
+    short_df = filtered_df.head(100)
+    return render_template('view_all.html', table=short_df.to_html(classes='data', header="true"))
 
 @app.route('/user_recommendation', methods=['GET', 'POST'])
 def user_recommendation():
@@ -34,7 +39,7 @@ def user_recommendation():
         user_id = request.form.get('user_id')
         if user_id:
             recommendations = recommendation.provide_recommendations_for_user(user_id, filtered_df)
-            recommendations = recommendations.sort_values('Predict_Score', ascending=False)
+            # recommendations = recommendations.sort_values('Predict_Score', ascending=False)
             if recommendations is None:
                 user_not_found = True
     return render_template('user_recommendation.html', recommendations=recommendations, user_not_found=user_not_found)

@@ -80,7 +80,7 @@ def add_book():
 def reload_model():
     global filtered_df
     global U_matrix, S_matrix, VT_matrix, user_id_to_index, product_id_to_index, original_matrix, U_train, VT_train
-
+    update_monitoring_stats(filtered_df)
     # Appeler la fonction pour reconstruire le système de recommandation
     recommendation.book_recommendation_system(filtered_df)
 

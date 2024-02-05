@@ -150,7 +150,7 @@ def book_recommendation_system(filtered_df):
         recall = np.mean(recall_scores)
         return recall
     # SVD
-    def split_train_test(matrix, test_size=0.1, random_state=42):
+    def split_train_test(matrix, test_size=0.01, random_state=42):
         train_matrix, test_matrix = train_test_split(matrix, test_size=test_size, random_state=random_state)
         return train_matrix, test_matrix
 

@@ -17,12 +17,24 @@
     <div class="main-content">
         <h2>Monitoring</h2>
         
-        <h3>Statistiques du DataFrame</h3>
-        <ul>
-            {% for key, value in df_stats.items() %}
-            <li>{{ key }}: {{ value }}</li>
+        <h3>Historique des Statistiques</h3>
+        <table>
+            <tr>
+                <th>Timestamp</th>
+                <th>Nombre de lignes</th>
+                <th>Nombre de produits uniques</th>
+                <th>Nombre d'utilisateurs uniques</th>
+            </tr>
+            {% for row in monitoring_df.itertuples() %}
+            <tr>
+                <td>{{ row.Timestamp }}</td>
+                <td>{{ row.Nombre_de_lignes }}</td>
+                <td>{{ row.Nombre_de_produits_uniques }}</td>
+                <td>{{ row.Nombre_d_utilisateurs_uniques }}</td>
+            </tr>
             {% endfor %}
-        </ul>
+            
+        </table>
 
         <h3>Résultats du Modèle</h3>
         <table>

@@ -1,6 +1,7 @@
 from flask import Flask, request, render_template, redirect, url_for
 import recommendation
 import pandas as pd
+import os
 
 # Chargement des modèles et des données
 try:
@@ -22,6 +23,11 @@ def index():
                 user_info = None  # Réinitialiser user_info si aucune info n'est trouvée
     return render_template('index.html', user_info=user_info)
 
+@app.route('/view_all')
+def view_all():
+    global filtered_df
+    short_df = filtered_df.head(100)
+    return render_template('view_all.html', table=short_df.to_html(classes='data', header="true"))
 
 @app.route('/user_recommendation', methods=['GET', 'POST'])
 def user_recommendation():
@@ -33,9 +39,9 @@ def user_recommendation():
         user_id = request.form.get('user_id')
         if user_id:
             recommendations = recommendation.provide_recommendations_for_user(user_id, filtered_df)
+            # recommendations = recommendations.sort_values('Predict_Score', ascending=False)
             if recommendations is None:
                 user_not_found = True
-
     return render_template('user_recommendation.html', recommendations=recommendations, user_not_found=user_not_found)
 
 
@@ -79,7 +85,7 @@ def add_book():
 def reload_model():
     global filtered_df
     global U_matrix, S_matrix, VT_matrix, user_id_to_index, product_id_to_index, original_matrix, U_train, VT_train
-
+    update_monitoring_stats(filtered_df)
     # Appeler la fonction pour reconstruire le système de recommandation
     recommendation.book_recommendation_system(filtered_df)
 
@@ -92,21 +98,46 @@ def reload_model():
     # Rediriger vers la page d'accueil ou une autre page appropriée
     return redirect(url_for('index'))
 
+def update_monitoring_stats(filtered_df):
+    file_path = 'Dataset/Monitoring.pkl'
+    
+    # Calculer les statistiques
+    df_stats = {
+        'Timestamp': pd.Timestamp.now(),
+        'Nombre_de_lignes': len(filtered_df),
+        'Nombre_de_produits_uniques': filtered_df['ProductId'].nunique(),
+        'Nombre_d_utilisateurs_uniques': filtered_df['UserId'].nunique(),
+    }
+    new_data = pd.DataFrame([df_stats])
+
+    # Charger ou créer le DataFrame de monitoring
+    if os.path.exists(file_path):
+        monitoring_data = pd.read_pickle(file_path)
+        monitoring_data = pd.concat([monitoring_data, new_data], ignore_index=True)
+    else:
+        monitoring_data = new_data
+
+    # Sauvegarder les données
+    monitoring_data.to_pickle(file_path)
+
+
+
 
 @app.route('/monitoring')
 def monitoring():
+    # Charger le modèle de résultats existant depuis le fichier pickle
     model_results = pd.read_pickle('Dataset/resultats.pkl')
 
-    df_stats = {
-        'Nombre de lignes': len(filtered_df),
-        'Nombre de produits uniques': filtered_df['ProductId'].nunique(),
-        'Nombre d utilisateurs uniques': filtered_df['UserId'].nunique(),
-    }
+    # Charger le DataFrame de suivi depuis le fichier pickle
+    monitoring_df = pd.read_pickle('Dataset/Monitoring.pkl')
 
+    # Passer le DataFrame monitoring_df directement au template
     category_stats = filtered_df.groupby('categories')['Score'].agg(['count', 'mean']).reset_index()
     category_stats.rename(columns={'count': 'Nombre_de_Livres', 'mean': 'Note_Moyenne'}, inplace=True)
 
-    return render_template('monitoring.html', model_results=model_results, df_stats=df_stats, category_stats=category_stats)
+    return render_template('monitoring.html', model_results=model_results, monitoring_df=monitoring_df, category_stats=category_stats)
+
+
 
 
 if __name__ == '__main__':

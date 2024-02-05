@@ -71,6 +71,9 @@ except FileNotFoundError as e:
 def book_recommendation_system(filtered_df):
     print("Training recommendation system start...")
     start_time = time.time()
+    
+    # print("Using small Model Version")
+    # filtered_df = filtered_df.head(1000)
 
     from fuzzywuzzy import process
 
@@ -147,11 +150,11 @@ def book_recommendation_system(filtered_df):
         recall = np.mean(recall_scores)
         return recall
     # SVD
-    def split_train_test(matrix, test_size=0.1, random_state=42):
+    def split_train_test(matrix, test_size=0.01, random_state=42):
         train_matrix, test_matrix = train_test_split(matrix, test_size=test_size, random_state=random_state)
         return train_matrix, test_matrix
 
-    def calculate_svd(train_matrix, k=600):
+    def calculate_svd(train_matrix, k=600): #k=600 and k=100 for the low version
         train_sparse = csr_matrix(train_matrix)
         # Perform SVD on the sparse matrix
         U_train, S_train, VT_train = svds(train_sparse, k=k)

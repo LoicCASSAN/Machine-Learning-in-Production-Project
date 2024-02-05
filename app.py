@@ -126,16 +126,25 @@ def update_monitoring_stats(filtered_df):
 @app.route('/monitoring')
 def monitoring():
     # Charger le modèle de résultats existant depuis le fichier pickle
-    model_results = pd.read_pickle('Dataset/resultats.pkl')
+    model_results_df = pd.read_pickle('Dataset/resultats.pkl')
 
     # Charger le DataFrame de suivi depuis le fichier pickle
     monitoring_df = pd.read_pickle('Dataset/Monitoring.pkl')
+    
+    # Tri par Timestamp si nécessaire
+    monitoring_df = monitoring_df.sort_values('Timestamp', ascending=False)
 
-    # Passer le DataFrame monitoring_df directement au template
+    # Calculer les statistiques par catégorie si nécessaire
     category_stats = filtered_df.groupby('categories')['Score'].agg(['count', 'mean']).reset_index()
     category_stats.rename(columns={'count': 'Nombre_de_Livres', 'mean': 'Note_Moyenne'}, inplace=True)
 
-    return render_template('monitoring.html', model_results=model_results, monitoring_df=monitoring_df, category_stats=category_stats)
+    # Passer les données au template
+    return render_template(
+        'monitoring.html', 
+        model_results=model_results_df, 
+        monitoring_df=monitoring_df, 
+        category_stats=category_stats
+    )
 
 
 

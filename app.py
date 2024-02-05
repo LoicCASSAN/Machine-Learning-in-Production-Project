@@ -93,20 +93,46 @@ def reload_model():
     # Rediriger vers la page d'accueil ou une autre page appropriée
     return redirect(url_for('index'))
 
+def update_monitoring_stats(filtered_df):
+    file_path = 'Dataset/Monitoring.pkl'
+    
+    # Calculer les statistiques
+    df_stats = {
+        'Timestamp': pd.Timestamp.now(),
+        'Nombre_de_lignes': len(filtered_df),
+        'Nombre_de_produits_uniques': filtered_df['ProductId'].nunique(),
+        'Nombre_d_utilisateurs_uniques': filtered_df['UserId'].nunique(),
+    }
+    new_data = pd.DataFrame([df_stats])
+
+    # Charger ou créer le DataFrame de monitoring
+    if os.path.exists(file_path):
+        monitoring_data = pd.read_pickle(file_path)
+        monitoring_data = pd.concat([monitoring_data, new_data], ignore_index=True)
+    else:
+        monitoring_data = new_data
+
+    # Sauvegarder les données
+    monitoring_data.to_pickle(file_path)
+
+
+
+
 @app.route('/monitoring')
 def monitoring():
+    # Charger le modèle de résultats existant depuis le fichier pickle
     model_results = pd.read_pickle('Dataset/resultats.pkl')
 
-    df_stats = {
-        'Nombre de lignes': len(filtered_df),
-        'Nombre de produits uniques': filtered_df['ProductId'].nunique(),
-        'Nombre d utilisateurs uniques': filtered_df['UserId'].nunique(),
-    }
+    # Charger le DataFrame de suivi depuis le fichier pickle
+    monitoring_df = pd.read_pickle('Dataset/Monitoring.pkl')
 
+    # Passer le DataFrame monitoring_df directement au template
     category_stats = filtered_df.groupby('categories')['Score'].agg(['count', 'mean']).reset_index()
     category_stats.rename(columns={'count': 'Nombre_de_Livres', 'mean': 'Note_Moyenne'}, inplace=True)
 
-    return render_template('monitoring.html', model_results=model_results, df_stats=df_stats, category_stats=category_stats)
+    return render_template('monitoring.html', model_results=model_results, monitoring_df=monitoring_df, category_stats=category_stats)
+
+
 
 
 if __name__ == '__main__':

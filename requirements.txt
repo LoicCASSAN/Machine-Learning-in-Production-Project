@@ -13,3 +13,4 @@ numexpr
 pyarrow
 pymysql
 cryptography
+flask

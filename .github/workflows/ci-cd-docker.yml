@@ -1,4 +1,4 @@
-name: ML in prod Project: ci-cd docker
+name: ML in prod Project ci cd docker
 on:
   push:
     branches: 

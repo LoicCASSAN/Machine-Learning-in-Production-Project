@@ -1,9 +1,8 @@
-name: ML in prod Project: ci-cd docker
+name: ML in prod Project ci cd docker
 on:
   push:
     branches: 
       - staging
-      - dev
 
 jobs:
   build-and-push-docker-image:
@@ -20,9 +19,7 @@ jobs:
          username: ${{ secrets.DOCKERHUB_USERNAME }}
          password: ${{ secrets.DOCKERHUB_PASSWORD }}
 
-     - name: Build image and push backend
-       uses: docker/build-push-action@v3
-       with:
-         # relative path to the place where source code with Dockerfile is located
-         context: .
-         tags:  ${{secrets.DOCKERHUB_USERNAME}}/project-ml-prod:latest
+     - name: Build Docker image and push backend
+       run: |
+        docker build . --tag ${{ secrets.DOCKERHUB_USERNAME }}/project-ml-prod:latest
+        docker push ${{ secrets.DOCKERHUB_USERNAME }}/project-ml-prod:latest

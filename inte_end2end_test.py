@@ -12,24 +12,26 @@ from selenium.webdriver.common.desired_capabilities import DesiredCapabilities
 
 # for testing purpose, only use 1000 rows of the dataset
 
-BASE_URL = "http://localhost:5000"
+# BASE_URL = "http://localhost:5000"
+BASE_URL = "http://web:5000"
 
 class AppTestCaseE2E(unittest.TestCase):
     def setUp(self):
         options = webdriver.ChromeOptions()
-        # options.add_argument('--headless')
+        options.add_argument('--headless')
         options.add_argument('--no-sandbox') # Disables the sandbox for all process types that are normally sandboxed.
         options.add_argument('--disable-dev-shm-usage') # Overcomes limited resource problems.
         options.add_argument('--disable-gpu') # Applicable to windows os only
-        # options.add_argument('--remote-debugging-port=9222')
+        options.add_argument('--remote-debugging-port=9222')
 
         # web driver with remote for the test to run in the container
-        # self.driver = webdriver.Remote(
-        #     command_executor='http://chrome:4444/wd/hub',
-        #     options=options)
-        # self.driver.get("http://web:5000/")
-        self.driver = webdriver.Chrome(executable_path="/Users/liujiaen/Documents/Codes/Machine-Learning-in-Production-Project/chromedriver-mac-arm64/chromedriver" ,options=options)
+        self.driver = webdriver.Remote(
+            command_executor='http://chrome:4444/wd/hub',
+            # command_executor='http://localhost:4444/wd/hub',
+            options=options)
         self.driver.get(BASE_URL)
+        # self.driver = webdriver.Chrome(executable_path="/Users/liujiaen/Documents/Codes/Machine-Learning-in-Production-Project/chromedriver-mac-arm64/chromedriver" ,options=options)
+        # self.driver.get(BASE_URL)
     
     def test_add_item_and_view_all(self):
         # Test adding a book
@@ -54,8 +56,8 @@ class AppTestCaseE2E(unittest.TestCase):
 
         # Test viewing all books
         # back to home page
-        self.driver.get(BASE_URL)
-        self.driver.find_element(by=By.XPATH, value="/html/body/div[2]/a/button").click()
+        self.driver.get(BASE_URL + "/view_all")
+        # self.driver.find_element(by=By.XPATH, value="/html/body/div[2]/a/button").click()
         # check if the added book is in the page
         self.assertIn("Test Book 2", self.driver.page_source)
 

@@ -12,8 +12,9 @@
         <a href="/add_book"><button>Add Book</button></a>
         <a href="/monitoring"><button>Monitoring</button></a>
         <a href="/reload_model"><button>Reload Model</button></a>
+        <a href="/view_all"><button>View All Data</button></a>
     </div>
-
+    
     <div class="main-content">
         <h2>Monitoring</h2>
         
@@ -39,16 +40,25 @@
         <h3>Résultats du Modèle</h3>
         <table>
             <tr>
-                <th>Métrique</th>
-                <th>Valeur</th>
+                <th>RMSE (training)</th>
+                <th>RMSE (test)</th>
+                <th>Precision @ 10</th>
+                <th>Recall @ 10</th>
+                <th>F1 Score</th>
             </tr>
-            {% for metric, value in model_results.items() %}
+            {% for row in model_results.itertuples() %}
             <tr>
-                <td>{{ metric }}</td>
-                <td>{{ value }}</td>
+                <td>{{ "%.4f"|format(row._1) }}</td>
+                <td>{{ "%.4f"|format(row._2) }}</td>
+                <td>{{ "%.4f"|format(row._3) }}</td>
+                <td>{{ "%.4f"|format(row._4) }}</td>
+                <td>{{ "%.4f"|format(row._5) }}</td>
             </tr>
             {% endfor %}
         </table>
+        
+        
+        
 
         <h3>Statistiques par Catégorie</h3>
         <table>

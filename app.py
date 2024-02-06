@@ -14,14 +14,23 @@ app = Flask(__name__)
 @app.route('/', methods=['GET', 'POST'])
 def index():
     global filtered_df
-    user_info = None  # Initialiser user_info à None
+    user_info = None
+    book_search_results = None  # Ajout pour la recherche de livres
+
     if request.method == 'POST':
         user_id = request.form.get('user_id')
+        search_title = request.form.get('search_title')  # Récupérer le titre recherché
+
         if user_id:
             user_info = recommendation.display_user_info(user_id, filtered_df)
-            if user_info.empty:  # Vérifier si le résultat est vide
-                user_info = None  # Réinitialiser user_info si aucune info n'est trouvée
-    return render_template('index.html', user_info=user_info)
+            if user_info.empty:
+                user_info = None
+
+        if search_title:  # Si un titre est recherché
+            book_search_results = recommendation.search_books_by_title(search_title, filtered_df)
+
+    return render_template('index.html', user_info=user_info, book_search_results=book_search_results)
+
 
 @app.route('/view_all')
 def view_all():
@@ -126,16 +135,25 @@ def update_monitoring_stats(filtered_df):
 @app.route('/monitoring')
 def monitoring():
     # Charger le modèle de résultats existant depuis le fichier pickle
-    model_results = pd.read_pickle('Dataset/resultats.pkl')
+    model_results_df = pd.read_pickle('Dataset/resultats.pkl')
 
     # Charger le DataFrame de suivi depuis le fichier pickle
     monitoring_df = pd.read_pickle('Dataset/Monitoring.pkl')
+    
+    # Tri par Timestamp si nécessaire
+    monitoring_df = monitoring_df.sort_values('Timestamp', ascending=False)
 
-    # Passer le DataFrame monitoring_df directement au template
+    # Calculer les statistiques par catégorie si nécessaire
     category_stats = filtered_df.groupby('categories')['Score'].agg(['count', 'mean']).reset_index()
     category_stats.rename(columns={'count': 'Nombre_de_Livres', 'mean': 'Note_Moyenne'}, inplace=True)
 
-    return render_template('monitoring.html', model_results=model_results, monitoring_df=monitoring_df, category_stats=category_stats)
+    # Passer les données au template
+    return render_template(
+        'monitoring.html', 
+        model_results=model_results_df, 
+        monitoring_df=monitoring_df, 
+        category_stats=category_stats
+    )
 
 
 

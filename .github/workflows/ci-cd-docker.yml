@@ -17,12 +17,10 @@ jobs:
      - name: Log in to Docker Hub
        uses: docker/login-action@f4ef78c080cd8ba55a85445d5b36e214a81df20a
        with:
-         username: myns75 # ${{ secrets.DOCKERHUB_USERNAME }}
+         username: ${{ secrets.DOCKERHUB_USERNAME }}
          password: ${{ secrets.DOCKERHUB_PASSWORD }}
 
-     - name: Build image and push backend
-       uses: docker/build-push-action@v3
-       with:
-         # relative path to the place where source code with Dockerfile is located
-         context: .
-         tags: myns75/project-ml-prod:latest # ${{secrets.DOCKERHUB_USERNAME}}/project-ml-prod:latest
+     - name: Build Docker image and push backend
+       run: |
+        docker build --tag ${{ secrets.DOCKERHUB_USERNAME }}/project-ml-prod:latest
+        docker push ${{ secrets.DOCKERHUB_USERNAME }}/project-ml-prod:latest

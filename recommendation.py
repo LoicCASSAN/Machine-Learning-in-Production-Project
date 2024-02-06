@@ -299,6 +299,15 @@ def display_user_info(user_id, df):
     user_info = df.loc[df['UserId'] == user_id]
     return user_info
 
+def search_books_by_title(word, df):
+    # Filtrer les livres dont le titre contient le mot spécifié
+    filtered_books = df[df['title'].str.contains(word, case=False, na=False)]
+
+    # Supprimer les doublons basés sur 'ProductId'
+    unique_books = filtered_books.drop_duplicates(subset='ProductId')
+
+    return unique_books
+
 def add_book(row, df):
     new_df = pd.DataFrame(row, index=[0])
     return pd.concat([df, new_df], ignore_index=True)

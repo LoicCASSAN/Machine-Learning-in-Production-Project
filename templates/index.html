@@ -11,7 +11,8 @@
         <a href="/user_recommendation"><button>User Recommendations</button></a>
         <a href="/add_book"><button>Add Book</button></a>
         <a href="/monitoring"><button>Monitoring</button></a>
-		<a href="/reload_model"><button>Reload Model</button></a>
+        <a href="/reload_model"><button>Reload Model</button></a>
+        <a href="/view_all"><button>View All Data</button></a>
     </div>
 
     <div class="main-content">
@@ -20,6 +21,7 @@
             <input type="text" name="user_id" placeholder="Enter User ID" />
             <button type="submit">Show Info</button>
         </form>
+
         {% if user_info is not none and not user_info.empty %}
             <table>
                 <tr>
@@ -46,7 +48,37 @@
         {% else %}
             <p>No user information to display. Please enter a User ID above.</p>
         {% endif %}
-        <a href="/view_all"><button>View All Data</button></a>
+
+        <h2>Search Books by Title</h2>
+        <form method="POST" action="/">
+            <input type="text" name="search_title" placeholder="Search by Book Title" />
+            <button type="submit">Search</button>
+        </form>
+
+        {% if book_search_results is not none and not book_search_results.empty %}
+            <table>
+                <tr>
+                    <th>Product ID</th>
+                    <th>Title</th>
+                    <th>Score</th>
+                    <th>Time</th>
+                    <th>Authors</th>
+                    <th>Categories</th>
+                </tr>
+                {% for row in book_search_results.itertuples() %}
+                <tr>
+                    <td>{{ row.ProductId }}</td>
+                    <td>{{ row.title }}</td>
+                    <td>{{ row.Score }}</td>
+                    <td>{{ row.Time }}</td>
+                    <td>{{ row.authors }}</td>
+                    <td>{{ row.categories }}</td>
+                </tr>
+                {% endfor %}
+            </table>
+        {% else %}
+            <p>No books found. Try a different title.</p>
+        {% endif %}
     </div>
 </body>
 </html>

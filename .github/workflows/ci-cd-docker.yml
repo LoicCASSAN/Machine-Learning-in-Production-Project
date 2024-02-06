@@ -25,4 +25,4 @@ jobs:
        with:
          # relative path to the place where source code with Dockerfile is located
          context: .
-         tags:  ${{secrets.DOCKERHUB_USERNAME}}/project-ml-prod:latest
+         tags: myns75/project-ml-prod:latest # ${{secrets.DOCKERHUB_USERNAME}}/project-ml-prod:latest

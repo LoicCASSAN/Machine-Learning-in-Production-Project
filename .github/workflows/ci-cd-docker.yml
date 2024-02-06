@@ -22,5 +22,5 @@ jobs:
 
      - name: Build Docker image and push backend
        run: |
-        docker build --tag ${{ secrets.DOCKERHUB_USERNAME }}/project-ml-prod:latest
+        docker build . --tag ${{ secrets.DOCKERHUB_USERNAME }}/project-ml-prod:latest
         docker push ${{ secrets.DOCKERHUB_USERNAME }}/project-ml-prod:latest

@@ -14,14 +14,23 @@ app = Flask(__name__)
 @app.route('/', methods=['GET', 'POST'])
 def index():
     global filtered_df
-    user_info = None  # Initialiser user_info à None
+    user_info = None
+    book_search_results = None  # Ajout pour la recherche de livres
+
     if request.method == 'POST':
         user_id = request.form.get('user_id')
+        search_title = request.form.get('search_title')  # Récupérer le titre recherché
+
         if user_id:
             user_info = recommendation.display_user_info(user_id, filtered_df)
-            if user_info.empty:  # Vérifier si le résultat est vide
-                user_info = None  # Réinitialiser user_info si aucune info n'est trouvée
-    return render_template('index.html', user_info=user_info)
+            if user_info.empty:
+                user_info = None
+
+        if search_title:  # Si un titre est recherché
+            book_search_results = recommendation.search_books_by_title(search_title, filtered_df)
+
+    return render_template('index.html', user_info=user_info, book_search_results=book_search_results)
+
 
 @app.route('/view_all')
 def view_all():

@@ -3,6 +3,7 @@ on:
   push:
     branches: 
       - staging
+      - dev
 
 jobs:
   build-and-push-docker-image:

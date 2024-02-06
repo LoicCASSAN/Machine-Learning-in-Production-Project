@@ -14,3 +14,4 @@ pyarrow
 pymysql
 cryptography
 flask
+flask_testing

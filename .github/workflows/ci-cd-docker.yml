@@ -5,9 +5,36 @@ on:
       - dev
 
 jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+        
+    - uses: actions/checkout@v3
+
+    - name: Set up and run necessary Docker Compose services
+      run: docker-compose -f docker-compose.yml up -d --no-deps chrome web
+
+    - name: Check if Chrome is up and running
+      run: |
+        until docker-compose -f docker-compose.yml exec -T web curl -f http://chrome:4444/wd/hub/status; do
+            echo "Waiting for Chrome service..."
+            sleep 5
+        done
+
+    - name: Run unit tests
+      run: docker-compose -f docker-compose.yml run --no-deps unit-test
+
+    - name: Run integration tests
+      run: docker-compose -f docker-compose.yml run --no-deps integration-test
+
+    - name: Tear down Docker Compose
+      if: always()
+      run: docker-compose -f docker-compose.yml down
+
   build-and-push-docker-image:
    runs-on: ubuntu-22.04
-  
+   needs: test
    # steps to perform in job
    steps:
      - name: Checkout code

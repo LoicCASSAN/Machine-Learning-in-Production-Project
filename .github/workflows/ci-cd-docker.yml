@@ -2,7 +2,8 @@ name: ML in prod Project ci cd docker
 on:
   push:
     branches: 
-      - dev
+      - staging
+      - main
 
 jobs:
   test:

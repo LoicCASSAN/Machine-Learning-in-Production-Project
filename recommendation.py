@@ -154,7 +154,7 @@ def book_recommendation_system(filtered_df):
         train_matrix, test_matrix = train_test_split(matrix, test_size=test_size, random_state=random_state)
         return train_matrix, test_matrix
 
-    def calculate_svd(train_matrix, k=600): #k=600 and k=100 for the low version
+    def calculate_svd(train_matrix, k=100): #k=600 and k=100 for the low version
         train_sparse = csr_matrix(train_matrix)
         # Perform SVD on the sparse matrix
         U_train, S_train, VT_train = svds(train_sparse, k=k)

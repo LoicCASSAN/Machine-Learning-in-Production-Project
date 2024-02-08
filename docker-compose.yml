@@ -1,0 +1,43 @@
+version: '3'
+services:
+  web:
+    image: my-flask-app
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "5000:5000"
+    volumes:
+      - .:/app
+
+  chrome:
+    image: selenium/standalone-chrome:latest
+    hostname: chrome
+    environment:
+      - START_XVFB=false
+      - SE_NODE_OVERRIDE_MAX_SESSIONS=true
+      - SE_NODE_MAX_SESSIONS=5
+      - JAVA_OPTS=-XX:ActiveProcessorCount=5
+    ports:
+      - "4444:4444"
+
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://chrome:4444/wd/hub/status"]
+      interval: 10s
+      timeout: 10s
+      retries: 5
+
+  unit-test:
+    image: my-flask-app
+    command: python unit_test.py
+    depends_on:
+      - web
+
+  integration-test:
+    image: my-flask-app
+    command: python inte_end2end_test.py
+    depends_on:
+      chrome:
+        condition: service_healthy
+      web:
+        condition: service_started
